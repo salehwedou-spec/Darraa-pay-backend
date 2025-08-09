@@ -1,0 +1,64 @@
+openapi: 3.0.3
+info:
+  title: Darraa Payment API
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000
+paths:
+  /payments/create:
+    post:
+      summary: إنشاء عملية دفع جديدة
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderId, amountMRU, provider]
+              properties:
+                orderId: { type: integer, example: 123 }
+                amountMRU: { type: integer, example: 45000 }
+                provider: { type: string, enum: [bankily, sedad, masrvi], example: bankily }
+      responses:
+        '200':
+          description: معلومات العملية
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  paymentId: { type: integer, example: 5 }
+                  merchantRef: { type: string, example: BK-1723119934 }
+  /payments/{id}/status:
+    get:
+      summary: التحقق من حالة عملية دفع
+      parameters:
+        - in: path
+          name: id
+          schema: { type: integer }
+          required: true
+      responses:
+        '200':
+          description: حالة العملية
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, enum: [pending, success, failed] }
+                  provider_ref: { type: string }
+  /simulate/webhook:
+    post:
+      summary: (DEV) محاكاة تحديث حالة الدفع
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [secret, provider, merchantRef, status]
+              properties:
+                secret: { type: string, example: letmein }
+                provider: { type: string, enum: [bankily, sedad, masrvi] }
+                merchantRef: { type: string }
+                status: { type: string, enum: [success, failed] }
